@@ -9,12 +9,16 @@ class User(Base):
     email=Column(String, unique=True)
     hashed_password=Column(String, nullable=False)
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    sessions=relationship("ChatSession", back_populates="user")
 
 class ChatSession(Base):
     __tablename__="chatsessions"
     id=Column(Integer, primary_key=True)
     user_id=Column(Integer, ForeignKey("users.id"))
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    user=relationship("User", back_populates="sessions")
+    messages=relationship("Message", back_populates="session")
+
 
 class Message(Base):
     __tablename__="messages"
@@ -23,4 +27,5 @@ class Message(Base):
     role=Column(String, nullable=False)
     content=Column(String)
     created_at=Column(DateTime, default=lambda:datetime.now(timezone.utc))
+    session=relationship("ChatSession", back_populates="messages")
 
