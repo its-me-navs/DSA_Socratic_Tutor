@@ -18,11 +18,10 @@ def register(email, password, db: Session=Depends(get_db)):
         return {"message" : "user registered successfully"}
         
 @router.post("/login")
-def login(email, password, db: Session=Depends(get_db)):
+def login(email, password, db: Session=Depends(get_db)):    
     user=db.query(User).filter(User.email==email).first()
     if user is None:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     elif not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid Credentials")
     return create_access_token({"sub":str(user.id)})
-
