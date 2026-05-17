@@ -34,4 +34,4 @@ def get_current_user(token: str=Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="token expired")
     except JWTError:
         raise HTTPException(status_code=401, detail="invalid token")
-    return user_id
+    return int(user_id)

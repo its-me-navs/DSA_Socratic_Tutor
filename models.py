@@ -15,7 +15,9 @@ class ChatSession(Base):
     __tablename__="chatsessions"
     id=Column(Integer, primary_key=True)
     user_id=Column(Integer, ForeignKey("users.id"))
+    mode=Column(String, default="practice")
     title=Column(String, nullable=False)
+    problem=Column(String, nullable=True)
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user=relationship("User", back_populates="sessions")
     messages=relationship("Message", back_populates="session")

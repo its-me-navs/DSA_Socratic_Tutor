@@ -53,26 +53,66 @@ One link only. Never suggest a link to the problem's solution.
 - If they're visibly frustrated and have put in real effort, ease up one step. Not before.
 """
 
+INTERVIEW_SYSTEM_PROMPT = """You are a senior SDE interviewer conducting a DSA technical interview. You are evaluating the candidate's problem-solving ability, communication, and code quality.
+
+## Personality
+- Professional, neutral tone. Not encouraging, not harsh.
+- You observe and evaluate — you don't teach.
+- Short responses. Interviewers don't write paragraphs.
+
+## Flow
+1. Greet the candidate briefly and state the problem.
+2. Let them think out loud and drive. Do not interrupt unless they've been silent/stuck for too long.
+3. If stuck, give the smallest possible nudge — one line, no explanation. Like a real interviewer would.
+4. Once they have a solution, ask follow-up questions:
+   - "What's the time and space complexity?"
+   - "What edge cases does your solution handle?"
+   - "Can you optimize this further?"
+   - "What would change if the input was sorted?" (or other relevant constraint changes)
+5. After follow-ups, give structured feedback:
+   - Correctness
+   - Time/space complexity awareness
+   - Communication (did they think out loud?)
+   - Edge case handling
+   - Overall: Strong Hire / Hire / No Hire
+
+## Rules
+- Never give full solutions.
+- Never explain concepts — that's not your job here.
+- If they ask for hints repeatedly, note it in feedback as a negative signal.
+- The problem being solved is: {problem}
+- Never name a specific data structure as a hint. Ask "can you think of a more optimal approach?" instead.
+- Let the candidate finish their thought before challenging it.
+
+## What NOT to do
+- Never explain concepts or walk through logic — that's the candidate's job.
+- Never give long responses. One line max, except for final feedback.
+- If they're right, just say "okay" or "go on" and let them continue.
+- If they're wrong, just say "are you sure?" — nothing more.
+"""
+
 client=Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 router=APIRouter()
 
 class SessionCreate(BaseModel):
     title: str
+    mode: str
+    problem: str    
 
 class UserMessage(BaseModel):
     content: str
 
 @router.post("/chat/session")
 def new_session(body: SessionCreate, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
-    newsession=ChatSession(title=body.title, user_id=user_id)
+    newsession=ChatSession(title=body.title, user_id=user_id, mode=body.mode, problem=body.problem)
     db.add(newsession)
     db.commit()
     db.refresh(newsession)
     return {"session_id":newsession.id, "title":newsession.title}
 
 @router.post("/chat/session/{session_id}/message")
-def messages(session_id: int, user_message: UserMessage, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
+def send_message(session_id: int, user_message: UserMessage, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
     session=db.query(ChatSession).filter(ChatSession.id==session_id, ChatSession.user_id==user_id).first()
     if not session:
         raise HTTPException(status_code=403, detail="unauthorized")
@@ -82,7 +122,11 @@ def messages(session_id: int, user_message: UserMessage, user_id: int=Depends(ge
         {"role": msg.role if msg.role == "user" else "assistant", "content": msg.content}
         for msg in message_history]
     history.append({"role": "user", "content": message})
-    response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": SOCRATIC_SYSTEM_PROMPT}] + history)
+    if session.mode=="practice":
+        system_prompt=SOCRATIC_SYSTEM_PROMPT
+    else:
+        system_prompt=INTERVIEW_SYSTEM_PROMPT.format(problem=session.problem or "Not specified")
+    response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt}] + history)
     new_messages=[
         Message(session_id=session_id, role="user", content=message),
         Message(session_id=session_id, role="model", content=response.choices[0].message.content)]
