@@ -15,11 +15,10 @@ class ChatSession(Base):
     __tablename__="chatsessions"
     id=Column(Integer, primary_key=True)
     user_id=Column(Integer, ForeignKey("users.id"))
+    title=Column(String, nullable=False)
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user=relationship("User", back_populates="sessions")
     messages=relationship("Message", back_populates="session")
-
-
 class Message(Base):
     __tablename__="messages"
     id=Column(Integer, primary_key=True)
@@ -28,4 +27,3 @@ class Message(Base):
     content=Column(String)
     created_at=Column(DateTime, default=lambda:datetime.now(timezone.utc))
     session=relationship("ChatSession", back_populates="messages")
-
