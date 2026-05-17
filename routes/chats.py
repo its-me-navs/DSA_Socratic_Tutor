@@ -141,3 +141,8 @@ def history(session_id:int, user_id: int=Depends(get_current_user), db: Session=
         raise HTTPException(status_code=403, detail="unauthorized")
     chat_history=db.query(Message).filter(Message.session_id==session_id).all()
     return chat_history
+
+@router.get("/chat/all-sessions")
+def all_sessions(user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
+    sessions=db.query(ChatSession).filter(ChatSession.user_id==user_id).all()
+    return [{"id": session.id, "title": session.title, "mode": session.mode, "created_at": session.created_at} for session in sessions]
