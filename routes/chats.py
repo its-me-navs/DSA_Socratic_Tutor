@@ -1,7 +1,7 @@
 from auth import get_current_user
 from sqlalchemy.orm import Session
 from database import get_db
-from models import ChatSession, Message
+from models import ChatSession, Message, User
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 import os
@@ -104,16 +104,16 @@ class UserMessage(BaseModel):
     content: str
 
 @router.post("/chat/session")
-def new_session(body: SessionCreate, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
-    newsession=ChatSession(title=body.title, user_id=user_id, mode=body.mode, problem=body.problem)
+def new_session(body: SessionCreate, user: User=Depends(get_current_user), db: Session=Depends(get_db)):
+    newsession=ChatSession(title=body.title, user_id=user.id, mode=body.mode, problem=body.problem)
     db.add(newsession)
     db.commit()
     db.refresh(newsession)
     return {"session_id":newsession.id, "title":newsession.title}
 
 @router.post("/chat/session/{session_id}/message")
-def send_message(session_id: int, user_message: UserMessage, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
-    session=db.query(ChatSession).filter(ChatSession.id==session_id, ChatSession.user_id==user_id).first()
+def send_message(session_id: int, user_message: UserMessage, user: User=Depends(get_current_user), db: Session=Depends(get_db)):
+    session=db.query(ChatSession).filter(ChatSession.id==session_id, ChatSession.user_id==user.id).first()
     if not session:
         raise HTTPException(status_code=403, detail="unauthorized")
     message=user_message.content
@@ -135,14 +135,14 @@ def send_message(session_id: int, user_message: UserMessage, user_id: int=Depend
     return {"response":response.choices[0].message.content}
 
 @router.get("/chat/session/{session_id}/history")
-def history(session_id:int, user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
-    session=db.query(ChatSession).filter(ChatSession.user_id==user_id, ChatSession.id==session_id).first()
+def history(session_id:int, user: User=Depends(get_current_user), db: Session=Depends(get_db)):
+    session=db.query(ChatSession).filter(ChatSession.user_id==user.id, ChatSession.id==session_id).first()
     if not session:
         raise HTTPException(status_code=403, detail="unauthorized")
     chat_history=db.query(Message).filter(Message.session_id==session_id).all()
     return chat_history
 
 @router.get("/chat/all-sessions")
-def all_sessions(user_id: int=Depends(get_current_user), db: Session=Depends(get_db)):
-    sessions=db.query(ChatSession).filter(ChatSession.user_id==user_id).all()
+def all_sessions(user: User=Depends(get_current_user), db: Session=Depends(get_db)):
+    sessions=db.query(ChatSession).filter(ChatSession.user_id==user.id).all()
     return [{"id": session.id, "title": session.title, "mode": session.mode, "created_at": session.created_at} for session in sessions]
