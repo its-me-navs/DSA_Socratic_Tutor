@@ -32,7 +32,7 @@ class Message(Base):
     session=relationship("ChatSession", back_populates="messages")
 
 class ReviewItem(Base):
-    __tablename="reviewitems"
+    __tablename__="reviewitems"
     id=Column(Integer, primary_key=True)
     user_id=Column(Integer, ForeignKey("users.id"))
     problem=Column(String, nullable=False)
