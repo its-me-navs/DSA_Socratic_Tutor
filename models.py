@@ -21,6 +21,7 @@ class ChatSession(Base):
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user=relationship("User", back_populates="sessions")
     messages=relationship("Message", back_populates="session")
+
 class Message(Base):
     __tablename__="messages"
     id=Column(Integer, primary_key=True)
@@ -29,3 +30,12 @@ class Message(Base):
     content=Column(String)
     created_at=Column(DateTime, default=lambda:datetime.now(timezone.utc))
     session=relationship("ChatSession", back_populates="messages")
+
+class ReviewItem(Base):
+    __tablename="reviewitems"
+    id=Column(Integer, primary_key=True)
+    user_id=Column(Integer, ForeignKey("users.id"))
+    problem=Column(String, nullable=False)
+    stage=Column(Integer, default=0)
+    next_review=Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
