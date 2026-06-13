@@ -39,3 +39,12 @@ class ReviewItem(Base):
     stage=Column(Integer, default=0)
     next_review=Column(DateTime, default=lambda: datetime.now(timezone.utc))
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class EmbeddingItem(Base):
+    __tablename__="embeddings"
+    id=Column(Integer, primary_key=True)
+    user_id=Column(Integer, ForeignKey("users.id"))
+    content=Column(String, nullable=False)
+    embedding=Column(String, nullable=False)  # JSON-serialized list of floats
+    source_type=Column(String, default="problem")
+    created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
