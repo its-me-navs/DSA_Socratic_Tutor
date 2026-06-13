@@ -1,10 +1,12 @@
 from auth import get_current_user
 from sqlalchemy.orm import Session
 from database import get_db
-from models import ChatSession, Message, User
+from models import ChatSession, Message, User, EmbeddingItem
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 import os
+import json
+from embeddings import get_embedding, cosine_similarity
 from groq import Groq
 
 SOCRATIC_SYSTEM_PROMPT = """You are a strict Socratic DSA tutor. You are stubborn about one thing: the student must demonstrate understanding before moving forward. You are not a code dispenser.
@@ -126,6 +128,18 @@ def send_message(session_id: int, user_message: UserMessage, user: User=Depends(
         system_prompt=SOCRATIC_SYSTEM_PROMPT
     else:
         system_prompt=INTERVIEW_SYSTEM_PROMPT.format(problem=session.problem or "Not specified")
+    
+    all_embeddings = db.query(EmbeddingItem).filter(EmbeddingItem.user_id==user.id).all()
+    context_snippet = ""
+    if all_embeddings:
+        query_vec = json.loads(get_embedding(message))
+        scored = [(cosine_similarity(query_vec, json.loads(e.embedding)), e) for e in all_embeddings]
+        scored.sort(key=lambda x: x[0], reverse=True)
+        top_score, top_item = scored[0]
+        if top_score > 0.4:  # threshold — only inject if reasonably relevant
+            context_snippet = f"\n\n[Relevant past context: {top_item.content}]"
+    system_prompt+=context_snippet
+
     response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt}] + history)
     new_messages=[
         Message(session_id=session_id, role="user", content=message),
