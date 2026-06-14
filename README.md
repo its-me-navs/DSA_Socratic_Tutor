@@ -79,21 +79,21 @@ Users can mark problems for review via `/review/add`. Each item starts at stage 
 ## Screenshots
 
 **Chat Session Message**:
-<img src="screenshots\chat_session_message.png">
+<img src="screenshots/chat_session_message.png">
 
 **Chat Session Message Response**:
-<img src="screenshots\chat_session_message_response.png">
+<img src="screenshots/chat_session_message_response.png">
 
 **Review Due** - shown by stage:0 :
-<img src="screenshots\review_due.png">
+<img src="screenshots/review_due.png">
 
 **Review 1 Complete** - shown by stage:1 :
-<img src="screenshots\review_complete.png">
+<img src="screenshots/review_complete.png">
 
 ## Roadmap
 
 - React frontend
 - Docker 
 - pgvector for production-scale similarity search
-- Interview mode — timed mock interviews with structured feedback
+- Interview mode
 - Deployment (Render/Neon)
