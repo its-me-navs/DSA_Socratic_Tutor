@@ -9,7 +9,7 @@ from database import get_db
 from models import User
 import os
 
-pwd_context=CryptContext(schemes=["bcrypt"])
+pwd_context=CryptContext(schemes=["bcrypt"]) 
 
 SECRET_KEY=os.getenv("SECRET_KEY")
 
