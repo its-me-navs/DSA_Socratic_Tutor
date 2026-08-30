@@ -146,7 +146,10 @@ def send_message(session_id: int, user_message: UserMessage, user: User=Depends(
         Message(session_id=session_id, role="model", content=response.choices[0].message.content)]
     db.add_all(new_messages)
     db.commit()
-    return {"response":response.choices[0].message.content}
+    raw=response.choices[0].message.content
+    if "</think>" in raw:
+        raw=raw.split("</think>")[-1].strip()
+    return {"response":raw}
 
 @router.get("/chat/session/{session_id}/history")
 def history(session_id:int, user: User=Depends(get_current_user), db: Session=Depends(get_db)):
