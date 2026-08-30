@@ -5,7 +5,7 @@ A full-stack backend for an AI-driven DSA tutoring system. Instead of giving dir
 ## Features
 
 - **JWT Authentication** — secure register/login with bcrypt password hashing
-- **Socratic AI Tutor** — Groq-powered (Llama 3.3 70B) chatbot that progressively escalates hints instead of giving solutions outright
+- **Socratic AI Tutor** — Groq-powered (Qwen3.6 27B) chatbot that progressively escalates hints instead of giving solutions outright
 - **Conversation Memory** — full session history is passed to the model on every message
 - **Semantic Search / RAG** — embeddings (sentence-transformers, all-MiniLM-L6-v2) + cosine similarity to retrieve relevant past problems and inject them as context
 - **Spaced Repetition** — fixed-interval review ladder (1 → 2 → 5 → 10 → 25 days) to track problems due for revision
@@ -15,7 +15,7 @@ A full-stack backend for an AI-driven DSA tutoring system. Instead of giving dir
 - **Backend**: FastAPI
 - **Database**: PostgreSQL + SQLAlchemy ORM
 - **Auth**: JWT (python-jose) + passlib/bcrypt
-- **LLM**: Groq API (Llama 3.3 70B Versatile)
+- **LLM**: Groq API (Qwen3.6 27B)
 - **Embeddings**: sentence-transformers (local, all-MiniLM-L6-v2)
 
 ## How It Works
@@ -97,3 +97,9 @@ Users can mark problems for review via `/review/add`. Each item starts at stage 
 - pgvector for production-scale similarity search
 - Interview mode
 - Deployment (Render/Neon)
+
+## Known issues/v2:
+
+- Wrong resource linked
+- pgvector migration for scale
+- Deployment pending
