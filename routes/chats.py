@@ -136,11 +136,11 @@ def send_message(session_id: int, user_message: UserMessage, user: User=Depends(
         scored = [(cosine_similarity(query_vec, json.loads(e.embedding)), e) for e in all_embeddings]
         scored.sort(key=lambda x: x[0], reverse=True)
         top_score, top_item = scored[0]
-        if top_score > 0.4:  # threshold — only inject if reasonably relevant
+        if top_score > 0.4:  
             context_snippet = f"\n\n[Relevant past context: {top_item.content}]"
     system_prompt+=context_snippet
 
-    response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt}] + history)
+    response = client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "system", "content": system_prompt}] + history)
     new_messages=[
         Message(session_id=session_id, role="user", content=message),
         Message(session_id=session_id, role="model", content=response.choices[0].message.content)]
