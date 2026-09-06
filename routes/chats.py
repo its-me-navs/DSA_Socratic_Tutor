@@ -32,17 +32,17 @@ SOCRATIC_SYSTEM_PROMPT = """You are a strict Socratic DSA tutor. You are stubbor
 - If they say "idk" to something they should know from context: "Look at what we've discussed. Take a guess."
 
 ## Resources (use only when student has no foothold on a concept)
-- Hash tables: https://www.geeksforgeeks.org/hashing-data-structure/
-- Arrays: https://www.geeksforgeeks.org/array-data-structure/
-- Sliding window: https://www.geeksforgeeks.org/window-sliding-technique/
-- Two pointers: https://www.geeksforgeeks.org/two-pointers-technique/
-- Binary search: https://www.geeksforgeeks.org/binary-search/
-- Graphs: https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/
-- Dynamic programming: https://www.geeksforgeeks.org/dynamic-programming/
-- Trees: https://www.geeksforgeeks.org/binary-tree-data-structure/
-- Stacks/Queues: https://www.geeksforgeeks.org/stack-data-structure/
-- Linked lists: https://www.geeksforgeeks.org/data-structures/linked-list/
-One link only. Never suggest a link to the problem's solution.
+- Hash tables (use when: student needs O(1) lookup to avoid nested loops, e.g. Two Sum, Group Anagrams, Contains Duplicate): https://www.geeksforgeeks.org/hashing-data-structure/
+- Arrays (use when: student unfamiliar with basic array traversal): https://www.geeksforgeeks.org/array-data-structure/
+- Sliding window (use when: problem involves contiguous subarray/substring with a condition on sum or length, e.g. Maximum Subarray, Longest Substring Without Repeating Characters): https://www.geeksforgeeks.org/window-sliding-technique/
+- Two pointers (use when: sorted array + finding pair/triplet satisfying a condition, e.g. Two Sum II, 3Sum, Container With Most Water): https://www.geeksforgeeks.org/two-pointers-technique/
+- Binary search (use when: sorted array + find target or minimize/maximize something, e.g. Search in Rotated Array, Koko Eating Bananas): https://www.geeksforgeeks.org/binary-search/
+- Graphs (use when: problem involves nodes/edges, connectivity, paths, e.g. Number of Islands, Clone Graph): https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/
+- Dynamic programming (use when: problem has overlapping subproblems + optimal substructure, e.g. Climbing Stairs, House Robber, Coin Change): https://www.geeksforgeeks.org/dynamic-programming/
+- Trees (use when: problem involves binary tree traversal, depth, paths, e.g. Maximum Depth, Lowest Common Ancestor): https://www.geeksforgeeks.org/binary-tree-data-structure/
+- Stacks/Queues (use when: problem needs LIFO/FIFO ordering, e.g. Valid Parentheses, Daily Temperatures): https://www.geeksforgeeks.org/stack-data-structure/
+- Linked lists (use when: problem involves node traversal, reversal, cycle detection, e.g. Reverse Linked List, Linked List Cycle): https://www.geeksforgeeks.org/data-structures/linked-list/
+One link only. Never suggest a link to the problem's solution. Match the resource to the specific concept the student is missing.
 
 ## Tone rules
 - No "great!", "good job", "that's correct" — just move forward.
@@ -140,7 +140,7 @@ def send_message(session_id: int, user_message: UserMessage, user: User=Depends(
             context_snippet = f"\n\n[Relevant past context: {top_item.content}]"
     system_prompt+=context_snippet
 
-    response = client.chat.completions.create(model="openai/gpt-oss-20b", messages=[{"role": "system", "content": system_prompt}] + history)
+    response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=[{"role": "system", "content": system_prompt}] + history)
     new_messages=[
         Message(session_id=session_id, role="user", content=message),
         Message(session_id=session_id, role="model", content=response.choices[0].message.content)]
