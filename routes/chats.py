@@ -140,7 +140,7 @@ def send_message(session_id: int, user_message: UserMessage, user: User=Depends(
             context_snippet = f"\n\n[Relevant past context: {top_item.content}]"
     system_prompt+=context_snippet
 
-    response = client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "system", "content": system_prompt}] + history)
+    response = client.chat.completions.create(model="openai/gpt-oss-20b", messages=[{"role": "system", "content": system_prompt}] + history)
     new_messages=[
         Message(session_id=session_id, role="user", content=message),
         Message(session_id=session_id, role="model", content=response.choices[0].message.content)]
